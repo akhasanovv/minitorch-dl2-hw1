@@ -53,13 +53,12 @@ class Module:
         if self._parameters:
             res = [(k, self._parameters[k]) for k in self._parameters]
         for key in self._modules:
-            res += [(k, v) for k, v in self._modules[key].named_parameters()]
+            res += [(key + '.' + k, v) for k, v in self._modules[key].named_parameters()]
         return res
 
     def parameters(self) -> Sequence[Parameter]:
         "Enumerate over all the parameters of this module and its descendents."
         params = self.named_parameters()
-        print(f"params: {params}")
         return [value for key, value in params]
 
     def add_parameter(self, k: str, v: Any) -> Parameter:

@@ -73,7 +73,8 @@ def relu(x: float) -> float:
 
     (See https://en.wikipedia.org/wiki/Rectifier_(neural_networks) .)
     """
-    return x if x > 0 else 0
+    x = float(x)
+    return x if x > 0.0 else 0.0
 
 
 EPS = 1e-6
@@ -106,7 +107,8 @@ def inv_back(x: float, d: float) -> float:
 
 def relu_back(x: float, d: float) -> float:
     r"If $f = relu$ compute $d \times f'(x)$"
-    return d if x > 0 else 0.0
+    d = float(d)
+    return d if x > 0.0 else 0.0
 
 
 # ## Task 0.3
