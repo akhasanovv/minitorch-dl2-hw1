@@ -42,9 +42,8 @@ def index_to_position(index: Index, strides: Strides) -> int:
     Returns:
         Position in storage
     """
-
-    # TODO: Implement for Task 2.1.
-    raise NotImplementedError('Need to implement for Task 2.1')
+    print(f"index: {index}, strides: {strides}")
+    return np.dot(index, strides)
 
 
 def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
@@ -60,8 +59,9 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
         out_index : return index corresponding to position.
 
     """
-    # TODO: Implement for Task 2.1.
-    raise NotImplementedError('Need to implement for Task 2.1')
+    for i in range(shape.shape[0]):
+        out_index[i] = ordinal % shape[i]
+        ordinal //= shape[i]
 
 
 def broadcast_index(
@@ -227,8 +227,22 @@ class TensorData:
             range(len(self.shape))
         ), f"Must give a position to each dimension. Shape: {self.shape} Order: {order}"
 
-        # TODO: Implement for Task 2.1.
-        raise NotImplementedError('Need to implement for Task 2.1')
+        new_storage = self._storage
+        new_shape = self.shape
+        new_strides = [self.strides[i] for i in order]
+        
+        for idx in range(self.size):
+            multidim_idx = self._shape
+            to_index(idx, self._shape, multidim_idx)
+            shuffled_idx = Index([multidim_idx[i] for i in order])
+            new_idx = index_to_position(shuffled_idx, Strides(new_strides))
+            new_storage[new_idx] = self._storage[idx]
+        
+        return TensorData(
+            storage=new_storage,
+            shape=new_shape,
+            strides=new_strides
+        )
 
     def to_string(self) -> str:
         s = ""
