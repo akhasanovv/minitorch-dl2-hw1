@@ -68,6 +68,8 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
         assert (cur_var.unique_id not in visited)
         visited[cur_var.unique_id] = 1
         for new_var in cur_var.parents:
+            if new_var.is_constant():
+                continue
             if new_var.unique_id in visited:
                 continue
             dfs(new_var)

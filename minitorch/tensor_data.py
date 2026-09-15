@@ -42,8 +42,10 @@ def index_to_position(index: Index, strides: Strides) -> int:
     Returns:
         Position in storage
     """
-    print(f"index: {index}, strides: {strides}")
-    return np.dot(index, strides)
+    res = 0
+    for i in range(len(index)):
+        res += int(index[i] * strides[i])
+    return res
 
 
 def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
@@ -59,7 +61,7 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
         out_index : return index corresponding to position.
 
     """
-    for i in range(shape.shape[0]):
+    for i in range(len(shape) - 1, -1, -1):
         out_index[i] = ordinal % shape[i]
         ordinal //= shape[i]
 
@@ -83,8 +85,12 @@ def broadcast_index(
     Returns:
         None
     """
-    # TODO: Implement for Task 2.2.
-    raise NotImplementedError('Need to implement for Task 2.2')
+    for i in range(len(out_index)):
+        out_index[i] = 0
+        
+    for i in range(len(out_index)):
+        if shape[i] > 1:
+            out_index[i] = big_index[i + len(big_index) - len(out_index)]
 
 
 def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
@@ -101,8 +107,29 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
     Raises:
         IndexingError : if cannot broadcast
     """
-    # TODO: Implement for Task 2.2.
-    raise NotImplementedError('Need to implement for Task 2.2')
+    shape1 = list(shape1)
+    shape2 = list(shape2)
+    
+    if len(shape1) < len(shape2):
+        shape1 = [1] * (len(shape2) - len(shape1)) + shape1
+    else:
+        shape2 = [1] * (len(shape1) - len(shape2)) + shape2
+        
+    res = []
+        
+    for i in range(len(shape1)):
+        if shape1[i] == 1:
+            res.append(shape2[i])
+        elif shape2[i] == 1:
+            res.append(shape1[i])
+        elif shape1[i] == shape2[i]:
+            res.append(shape1[i])
+        else:
+            raise IndexingError
+    
+    return tuple(res)
+    
+
 
 
 def strides_from_shape(shape: UserShape) -> UserStrides:
@@ -226,22 +253,14 @@ class TensorData:
         assert list(sorted(order)) == list(
             range(len(self.shape))
         ), f"Must give a position to each dimension. Shape: {self.shape} Order: {order}"
-
-        new_storage = self._storage
-        new_shape = self.shape
+        
+        new_shape = [self.shape[i] for i in order]
         new_strides = [self.strides[i] for i in order]
         
-        for idx in range(self.size):
-            multidim_idx = self._shape
-            to_index(idx, self._shape, multidim_idx)
-            shuffled_idx = Index([multidim_idx[i] for i in order])
-            new_idx = index_to_position(shuffled_idx, Strides(new_strides))
-            new_storage[new_idx] = self._storage[idx]
-        
         return TensorData(
-            storage=new_storage,
-            shape=new_shape,
-            strides=new_strides
+            storage=self._storage,
+            shape=tuple(new_shape),
+            strides=tuple(new_strides)
         )
 
     def to_string(self) -> str:
